@@ -55,3 +55,24 @@ created: 2026-09-13
 - 初始化命令：`bash ~/.pi/agent/npm/node_modules/pi-memory-md/skills/memory-init/scripts/memory-init.sh`（本机**无 jq**，会走 grep/sed 回退，仍可用）；斜杠命令是 `/skill:memory-init`
 - #lesson 记忆文件格式硬要求：文件**必须有被 `---` 包裹的 frontmatter**；`description` 必须 string、`tags` 必须数组、`limit` 必须正数，否则**不参与检索**
 - 本机已装的 skill：`cpp-defect-review`、`cpp-assign-plus-review`、`doc-to-md`（均在 `~/.pi/agent/skills/`）
+
+## ⚠️ 写记忆的纪律（每个项目都适用，别踩）
+- **项目记忆必须放在 `<分区>/core/` 下**（项目记忆用 `<分区>/core/project/`）。
+  实测：放在 `core/` 之外（如 `<分区>/docs/`）的文件**既不会被注入，也搜不到**。
+  因为注入根和搜索根都写死为 `<分区>/core/`。
+- 但 **`memory_check` 的“Memory files (N)”会把 `core/` 之外的文件也算进去** → 这个数字会骗人，不能当作“已生效”的依据。
+- **只有真正跨项目通用的事实才写进 `global/`** —— global 会注入到**每一个项目**，写错就污染全部项目。
+- 写记忆没有沙箱：`memory_write` / `memory_read` / `memory_list` 在 0.1.38 里**全是注释状态**，实际只注册了 `memory_sync` / `memory_search` / `memory_check`。
+  写文件靠 native `write` / `edit` 直接写，**写错分区不会报错** → 必须先用
+  `bash ~/.pi/agent/npm/node_modules/pi-memory-md/skills/memory-write/scripts/memory-write.sh project-dir` 确认目标目录。
+- 完整分析（4 个污染风险点 + 实测证据 + 诊断方法）：`pi的记忆研究/core/project/记忆隔离与污染分析.md`
+
+## 本机常用路径速查
+| 用途 | 路径 |
+|---|---|
+| 记忆库根 | `C:/Users/23932/.pi/memory-md` |
+| pi 配置 | `C:/Users/23932/.pi/agent/settings.json` |
+| pi 扩展包 | `C:/Users/23932/.pi/agent/npm/node_modules/` |
+| skill 目录 | `C:/Users/23932/.pi/agent/skills/` |
+| 学习/项目根 | `D:/工作学习/` |
+| 记忆系统研究 | `D:/工作学习/pi的记忆研究/` |
