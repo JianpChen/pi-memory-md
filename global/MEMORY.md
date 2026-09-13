@@ -46,3 +46,12 @@ created: 2026-09-13
 - 位置：`~/.pi/agent/npm/node_modules/pi-memory-md/utils.ts`；备份 `utils.ts.bak-*`
 - 完整补丁 + 可复现验证脚本 + 回滚方法：`D:/工作学习/pi的记忆研究/pi-memory-md-Windows路径补丁/README.md`
 - 上游 `github.com/VandeeFeng/pi-memory-md` 的 `main` 分支截至 2026-09-13 **未修复**，更新插件后需重新打补丁
+
+## 记忆系统现状（2026-09-13 起）
+- #fact 当前用 **pi-memory-md**（Markdown 文件 + git 版本管理的记忆库）；旧的两套（`pi-memory-agent` 插件、`memory-profiles` skill）已卸载删除
+- 记忆库远程：`https://github.com/JianpChen/pi-memory-md.git`，本地 `C:/Users/23932/.pi/memory-md`
+- 配置：`~/.pi/agent/settings.json` 顶层键 `pi-memory-md`，`memoryDir.repoUrl` **必填**；已开自动同步 `hooks.sessionStart=["pull"]`、`hooks.sessionEnd=["push"]`（默认 sessionEnd 是空数组=不自动推）
+- **分区规则**：分区名 = 当前所在目录的 git 仓库目录名（不是 git 仓库则用目录名），另有 `global/` 共享区对**所有项目**可见
+- 初始化命令：`bash ~/.pi/agent/npm/node_modules/pi-memory-md/skills/memory-init/scripts/memory-init.sh`（本机**无 jq**，会走 grep/sed 回退，仍可用）；斜杠命令是 `/skill:memory-init`
+- #lesson 记忆文件格式硬要求：文件**必须有被 `---` 包裹的 frontmatter**；`description` 必须 string、`tags` 必须数组、`limit` 必须正数，否则**不参与检索**
+- 本机已装的 skill：`cpp-defect-review`、`cpp-assign-plus-review`、`doc-to-md`（均在 `~/.pi/agent/skills/`）
