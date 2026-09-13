@@ -37,6 +37,10 @@ created: 2026-09-13
 - `package-manager.js` 判定是否重装：`needsInstall = !existsSync(installedPath) || !installedNpmMatchesConfiguredVersion(...)`
 - 而 `installedNpmMatchesConfiguredVersion` 对**没有版本号**的 spec 直接返回 `true`
 - **结论：手动装的包，spec 千万别写版本号**，否则 pi 启动时会重装并再次踩同样的坑
+- `pi install <本地路径>` 的 local 分支只做「路径存在性校验 + 写 settings」，**不会跑 `npm install`**（源码 `dist/core/package-manager.js` install()）
+- **推论：带 npm 依赖的插件也能离线装** —— 把依赖闭包 vendor 进包目录内的 `node_modules/` 即可；
+  但 `typebox` 和 `@earendil-works/pi-coding-agent` 不用带（扩展加载器有 alias / virtualModules 内置）。
+  现成范例：`pi-memory-md-offline-v0.1.38.zip`，打包脚本 `D:/工作学习/pi的记忆研究/tools/build-offline-package.py`
 
 ## pi-memory-md 在 Windows 上的路径 bug（已本地修复）
 - 症状：会话启动报 `Error: Directory exists but is not a git repo: C:/Users/23932/.pi/memory-md (start/pull)`
@@ -47,6 +51,17 @@ created: 2026-09-13
 - 完整补丁 + 可复现验证脚本 + 回滚方法：`D:/工作学习/pi的记忆研究/pi-memory-md-Windows路径补丁/README.md`
 - 上游 `github.com/VandeeFeng/pi-memory-md` 的 `main` 分支截至 2026-09-13 **未修复**，更新插件后需重新打补丁
 
+## pi-memory-md 多用户档案 profiles（已本地新增，2026-09-14）
+- 场景：多人共用一台 pi，每人要**自己独立的记忆仓库（独立 git 链接）**
+- 配置：`~/.pi/agent/settings.json` 的 `pi-memory-md.profiles.{名字}` → `{repoUrl, localPath?, globalMemory?}`；`profile` 是默认档案，`profilesDir` 是默认克隆目录父目录（默认 `~/.pi`）
+- 取当前档案优先级：`PI_MEMORY_PROFILE` 环境变量 > 状态文件 `~/.pi/agent/memory-md-profile` > `settings.profile` > 旧的顶层 repoUrl/localPath
+- 命令：`/memory-profile`（别名 `/memory-user`）看当前用户+仓库链接；`/memory-profile use <名字>` 切换（即时生效、自动 pull/clone）；还有 `repo` / `list` / `add` / `remove` / `sync` 子命令
+- pi 外部切换器（零依赖，双击出菜单）：`D:/工作学习/pi的记忆研究/tools/pi-memory-profile.cmd`
+- #lesson 多人**同时**用 pi 时，状态文件是机器级共享会互抢 → 给每人一个启动脚本 `set PI_MEMORY_PROFILE=名字` 再 `pi`
+- #lesson **别改插件 package.json 的 version**：pi 会按 `installedNpmMatchesConfiguredVersion` 判定重装，改版本号就会被覆盖补丁
+- 完整补丁 + 49 项离线验证 + 部署方法：`D:/工作学习/pi的记忆研究/pi-memory-md-多用户档案补丁/README.md`；补丁后源码 `pi-memory-md-patched-0.1.38-profiles.zip`；离线一键包 `pi-memory-md-offline-v0.1.38-profiles.zip`
+- 项目记忆：`pi的记忆研究/core/project/多用户记忆档案-profiles补丁.md`
+
 ## 记忆系统现状（2026-09-13 起）
 - #fact 当前用 **pi-memory-md**（Markdown 文件 + git 版本管理的记忆库）；旧的两套（`pi-memory-agent` 插件、`memory-profiles` skill）已卸载删除
 - 记忆库远程：`https://github.com/JianpChen/pi-memory-md.git`，本地 `C:/Users/23932/.pi/memory-md`
@@ -55,6 +70,7 @@ created: 2026-09-13
 - 初始化命令：`bash ~/.pi/agent/npm/node_modules/pi-memory-md/skills/memory-init/scripts/memory-init.sh`（本机**无 jq**，会走 grep/sed 回退，仍可用）；斜杠命令是 `/skill:memory-init`
 - #lesson 记忆文件格式硬要求：文件**必须有被 `---` 包裹的 frontmatter**；`description` 必须 string、`tags` 必须数组、`limit` 必须正数，否则**不参与检索**
 - 本机已装的 skill：`cpp-defect-review`、`cpp-assign-plus-review`、`doc-to-md`（均在 `~/.pi/agent/skills/`）
+- #fact 本机 pi-memory-md 已被本地打上**多用户档案**补丁（`/memory-profile`），多人可各用独立仓库；多人同时使用时用 `PI_MEMORY_PROFILE`
 
 ## ⚠️ 写记忆的纪律（每个项目都适用，别踩）
 - **项目记忆必须放在 `<分区>/core/` 下**（项目记忆用 `<分区>/core/project/`）。
@@ -76,3 +92,5 @@ created: 2026-09-13
 | skill 目录 | `C:/Users/23932/.pi/agent/skills/` |
 | 学习/项目根 | `D:/工作学习/` |
 | 记忆系统研究 | `D:/工作学习/pi的记忆研究/` |
+| 多用户档案补丁 | `D:/工作学习/pi的记忆研究/pi-memory-md-多用户档案补丁/` |
+| 档案切换器 | `D:/工作学习/pi的记忆研究/tools/pi-memory-profile.cmd` |
