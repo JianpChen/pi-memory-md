@@ -37,3 +37,12 @@ created: 2026-09-13
 - `package-manager.js` 判定是否重装：`needsInstall = !existsSync(installedPath) || !installedNpmMatchesConfiguredVersion(...)`
 - 而 `installedNpmMatchesConfiguredVersion` 对**没有版本号**的 spec 直接返回 `true`
 - **结论：手动装的包，spec 千万别写版本号**，否则 pi 启动时会重装并再次踩同样的坑
+
+## pi-memory-md 在 Windows 上的路径 bug（已本地修复）
+- 症状：会话启动报 `Error: Directory exists but is not a git repo: C:/Users/23932/.pi/memory-md (start/pull)`
+- 根因：`utils.ts` 的 `getProjectMeta()` 里 `cwd = path.resolve(...)` 是**反斜杠**，`gitRoot = git rev-parse --show-toplevel` 是**正斜杠**，而 `memory-git.ts:96/158` 和 `tools.ts:167` 用**严格相等**比较两者 → Windows 上永远不相等 → 明明是真仓库却报「不是 git 仓库」
+- **不是配置问题**：改 `localPath` 的正/反斜杠写法都没用
+- 修复：在 `getProjectMeta()` 里对 git 输出的路径做 `path.normalize()`（同时处理 `gitRoot` 和 `mainRoot`，保证 worktree 判断也自洽）。一处修改修好全部 3 个调用点
+- 位置：`~/.pi/agent/npm/node_modules/pi-memory-md/utils.ts`；备份 `utils.ts.bak-*`
+- 完整补丁 + 可复现验证脚本 + 回滚方法：`D:/工作学习/pi的记忆研究/pi-memory-md-Windows路径补丁/README.md`
+- 上游 `github.com/VandeeFeng/pi-memory-md` 的 `main` 分支截至 2026-09-13 **未修复**，更新插件后需重新打补丁
