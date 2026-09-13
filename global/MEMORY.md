@@ -40,7 +40,8 @@ created: 2026-09-13
 - `pi install <本地路径>` 的 local 分支只做「路径存在性校验 + 写 settings」，**不会跑 `npm install`**（源码 `dist/core/package-manager.js` install()）
 - **推论：带 npm 依赖的插件也能离线装** —— 把依赖闭包 vendor 进包目录内的 `node_modules/` 即可；
   但 `typebox` 和 `@earendil-works/pi-coding-agent` 不用带（扩展加载器有 alias / virtualModules 内置）。
-  现成范例：`pi-memory-md-offline-v0.1.38.zip`，打包脚本 `D:/工作学习/pi的记忆研究/tools/build-offline-package.py`
+  现成范例：`pi-memory-md-offline-v0.1.38.zip`（0.1.38 + Windows 补丁）与 `pi-memory-md-offline-v0.1.38-profiles.zip`（再加多用户档案，推荐）
+  打包脚本：`D:/工作学习/pi的记忆研究/tools/build-offline-package.py`（会自动把《pi-memory-md 离线安装指南.md》写成包内 `OFFLINE-INSTALL.md`）
 
 ## pi-memory-md 在 Windows 上的路径 bug（已本地修复）
 - 症状：会话启动报 `Error: Directory exists but is not a git repo: C:/Users/23932/.pi/memory-md (start/pull)`
@@ -59,7 +60,8 @@ created: 2026-09-13
 - pi 外部切换器（零依赖，双击出菜单）：`D:/工作学习/pi的记忆研究/tools/pi-memory-profile.cmd`
 - #lesson 多人**同时**用 pi 时，状态文件是机器级共享会互抢 → 给每人一个启动脚本 `set PI_MEMORY_PROFILE=名字` 再 `pi`
 - #lesson **别改插件 package.json 的 version**：pi 会按 `installedNpmMatchesConfiguredVersion` 判定重装，改版本号就会被覆盖补丁
-- 完整补丁 + 49 项离线验证 + 部署方法：`D:/工作学习/pi的记忆研究/pi-memory-md-多用户档案补丁/README.md`；补丁后源码 `pi-memory-md-patched-0.1.38-profiles.zip`；离线一键包 `pi-memory-md-offline-v0.1.38-profiles.zip`
+- 完整补丁 + 49 项离线验证 + 部署方法：`D:/工作学习/pi的记忆研究/pi-memory-md-多用户档案补丁/README.md`；补丁后源码 `pi-memory-md-patched-0.1.38-profiles.zip`；离线一键包 `pi-memory-md-offline-v0.1.38-profiles.zip`（sha256 `b5deed7d…a49e`）
+- 给同学的中文离线安装指南（含无网机器上记忆库怎么放）：`D:/工作学习/pi的记忆研究/pi-memory-md离线安装指南.md`
 - 项目记忆：`pi的记忆研究/core/project/多用户记忆档案-profiles补丁.md`
 
 ## 记忆系统现状（2026-09-13 起）
@@ -93,4 +95,5 @@ created: 2026-09-13
 | 学习/项目根 | `D:/工作学习/` |
 | 记忆系统研究 | `D:/工作学习/pi的记忆研究/` |
 | 多用户档案补丁 | `D:/工作学习/pi的记忆研究/pi-memory-md-多用户档案补丁/` |
+| 中文离线安装指南 | `D:/工作学习/pi的记忆研究/pi-memory-md离线安装指南.md` |
 | 档案切换器 | `D:/工作学习/pi的记忆研究/tools/pi-memory-profile.cmd` |

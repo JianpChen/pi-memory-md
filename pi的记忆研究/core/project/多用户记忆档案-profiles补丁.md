@@ -2,7 +2,7 @@
 description: pi-memory-md 多用户档案（profiles）补丁：多人在同一台 pi 上各用独立记忆仓库，含 /memory-profile 命令、切换器脚本、验证与部署方法
 tags: [pi-memory-md, 多用户, profiles, 补丁, 记忆隔离, 实测]
 created: 2026-09-14
-updated: 2026-09-14
+updated: "2026-09-14"
 ---
 
 # pi-memory-md 多用户档案（profiles）补丁
@@ -51,6 +51,17 @@ updated: 2026-09-14
 
 pi 外部：`node tools/pi-memory-profile.mjs use bob`，或双击 `tools/pi-memory-profile.cmd` 出菜单。
 
+### 提示语义（FAQ，少踩坑）
+
+| 提示 | 含义 | 要紧吗 |
+|---|---|---|
+| `Warning: No memory profile configured. Use /memory-profile add <name> <repoUrl>` | 只有 `/memory-profile list`（别名 `/memory-user list`）在 `profiles` 为空时给，源码 `index.ts:711-715` | **不是错误**：还没定义任何档案，插件走顶层单仓库模式（`memoryDir.repoUrl` + `localPath`），记忆功能正常 |
+| `/memory-profile`（不带参数）显示 `(none - using top-level repoUrl/localPath)` | 同上——未启用档案，但会列出当前仓库链接、本地路径、git origin | 正常 |
+| `Unknown memory profile "x". Configured: ...` | `use <名字>` 的名字不在 `profiles` 里 | 真错误，拼错或还没 `add` |
+| `Warning: local clone origin is ... but this profile expects ...` | 本地目录被别的用户的仓库占着 | 切换时会**跳过同步**，需手动处理该目录 |
+
+只有一个用户在用这台 pi 时，**不需要配置 profiles**，上面第一条警告可以直接无视。
+
 ## 关键技术点（下次改插件可复用）
 
 - 新增 `profiles.ts`：档案解析 + 状态文件读写 + `settings.json` **安全改写**（保留其它顶层键、写前备份 `.bak`、tmp+rename 原子替换）
@@ -65,7 +76,8 @@ pi 外部：`node tools/pi-memory-profile.mjs use bob`，或双击 `tools/pi-mem
 |---|---|
 | 补丁说明 + 部署 + 验证方法 | `D:/工作学习/pi的记忆研究/pi-memory-md-多用户档案补丁/README.md` |
 | 验证脚本（49 项断言，全离线） | `同目录/_verify-profiles.mjs`（配 `_stub-pi-*.mjs`） |
-| 离线一键安装包（含补丁，5.9 MB） | 同目录 `pi-memory-md-offline-v0.1.38-profiles.zip` |
+| 离线一键安装包（含补丁，5.9 MB） | 同目录 `pi-memory-md-offline-v0.1.38-profiles.zip`（sha256 `b5deed7d…a49e`） |
+| **中文离线安装指南** | `D:/工作学习/pi的记忆研究/pi-memory-md离线安装指南.md`（打包脚本会把它写成包内 `OFFLINE-INSTALL.md`） |
 | 原始文件留档 | 同目录 `index.ts.原始版`、`memory-core.ts.原始版`、`types.ts.原始版` |
 | 补丁后完整源码（重打补丁用） | 同目录 `pi-memory-md-patched-0.1.38-profiles.zip` |
 | pi 外部切换器 | `D:/工作学习/pi的记忆研究/tools/pi-memory-profile.mjs` / `.cmd` |
